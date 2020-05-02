@@ -1,6 +1,0 @@
-package adaptors.usecase
-
-import adaptors.repository.{PostRepositoryComponentImpl, UserRepositoryComponentImpl}
-import usecases.createpost.ICreatePostInteractor
-
-object CreatePostInputBoundaryImpl extends ICreatePostInteractor with PostRepositoryComponentImpl with UserRepositoryComponentImpl

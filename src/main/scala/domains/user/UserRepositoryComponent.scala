@@ -1,6 +1,4 @@
-package usecases.Repositories
-
-import domains.user.User
+package domains.user
 
 trait UserRepositoryComponent {
   val userRepository: UserRepository

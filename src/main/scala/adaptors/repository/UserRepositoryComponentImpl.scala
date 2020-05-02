@@ -1,7 +1,6 @@
 package adaptors.repository
 
-import domains.user.User
-import usecases.Repositories.UserRepositoryComponent
+import domains.user.{User, UserRepositoryComponent}
 
 trait UserRepositoryComponentImpl extends UserRepositoryComponent {
   val userRepository = UserRepositoryImpl

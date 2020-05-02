@@ -1,13 +1,17 @@
 package adaptors.presenters
 
-import domains.post.Post
 import usecases.createpost.ICreatePostOutputBoundary
 import usecases.createpost.CreatePostOutputData
 
-trait ICreatePostPresenter extends ICreatePostOutputBoundary{
-  def run(outPutData: CreatePostOutputData): Option[Post] = {
-    outPutData.post
+class CreatePostPresenter(var res: CreatePostResult) extends ICreatePostOutputBoundary {
+  def run(outPutData: CreatePostOutputData): Unit = {
+    outPutData.post match {
+      case Some(_) => res.value = Right(CreatePostSuccessResult("OK"))
+      case _ => res.value = Left(CreatePostFailedResult("NG", "failed createPost"))
+    }
+  }
+
+  def getValue(): CreatePostResult= {
+    res
   }
 }
-
-object CreatePostPresenter extends ICreatePostPresenter

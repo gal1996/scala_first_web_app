@@ -2,9 +2,7 @@ package domains.post
 
 import java.util.{Date, UUID}
 
-import adaptors.repository.{PostRepositoryComponentImpl, UserRepositoryComponentImpl}
-import domains.post
-import usecases.Repositories.UserRepositoryComponent
+import domains.user.UserRepositoryComponent
 
 class Post private (
   val id: String,
@@ -13,10 +11,13 @@ class Post private (
   val parentPostId: String,
   val relatedPostCount: Int,
   val postedAt: String
-) {}
+) {
 
-object Post extends {
-  def apply(_id: Option[String], _userId: String, _text: String, _parentPostId: Option[String], _relatedPostCount: Option[Int], _postedAt: Option[String], userIsExists: Boolean): Option[Post] ={
+}
+
+
+object Post {
+  def apply(_id: Option[String], _userId: String, _text: String, _parentPostId: Option[String], _relatedPostCount: Option[Int], _postedAt: Option[String], userIsExists: Boolean): Option[Post] = {
     def isTextExists(text: String): Boolean = if (text != "") true else false
 
     val id: String = _id.getOrElse(UUID.randomUUID().toString)
@@ -32,6 +33,10 @@ object Post extends {
     } else {
       None
     }
+  }
+
+  def addRelatedPostCount(post: Post): Post = {
+    Post(Some(post.id), post.userId, post.text, Some(post.parentPostId), Some(post.relatedPostCount + 1), Some(post.postedAt), true).get
   }
 }
 

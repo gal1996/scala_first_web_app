@@ -1,6 +1,6 @@
 package adaptors.usecase
 
 import adaptors.repository.PostRepositoryComponentImpl
-import usecases.getrelatedposts.IGetRelatedPostsInputBoundary
+import usecases.getrelatedposts.GetRelatedPostsInteractor
 
-object GetRelatedPostsInputBoundaryImpl extends IGetRelatedPostsInputBoundary with PostRepositoryComponentImpl
+object GetRelatedPostsInputBoundaryImpl extends GetRelatedPostsInteractor with PostRepositoryComponentImpl

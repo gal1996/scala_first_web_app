@@ -1,3 +1,5 @@
 package adaptors.presenters
 
-case class CreatePostResult(result: String) extends Result
+case class CreatePostSuccessResult(result: String)
+case class CreatePostFailedResult(result: String, message: String)
+case class CreatePostResult(var value: Either[CreatePostFailedResult, CreatePostSuccessResult])

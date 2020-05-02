@@ -1,8 +1,7 @@
 package adaptors.repository
 
 import com.google.cloud.datastore.StructuredQuery.{OrderBy, PropertyFilter}
-import domains.post.Post
-import usecases.Repositories.PostRepositoryComponent
+import domains.post.{Post, PostRepositoryComponent}
 import com.google.cloud.datastore._
 
 import scala.concurrent.Future
@@ -14,7 +13,7 @@ trait PostRepositoryComponentImpl extends PostRepositoryComponent {
 
   object PostRepositoryImple extends PostRepository {
     override def store(post: Post): Option[Post] = {
-      val key = kind.newKey(post.id.toString)
+      val key = kind.newKey(post.id)
       val entity = Entity.newBuilder(key)
         .set("userId", post.userId)
         .set("text", post.text)
@@ -40,22 +39,27 @@ trait PostRepositoryComponentImpl extends PostRepositoryComponent {
         posts.append(entity2model(queryResults.next))
       }
 
-      def entity2model(entity: Entity): Post = {
-        Post(
-          Some(entity.getKey.getName),
-          entity.getString("userId"),
-          entity.getString("text"),
-          Some(entity.getString("parentPostId")),
-          Some(entity.getLong("relatedPostCount").toInt),
-          Some(entity.getString("postedAt")),
-          true
-        ).get
-      }
-
       Some(posts.toSeq)
+    }
+
+    override def get(id: String): Option[Post] = {
+      val key = kind.newKey(id)
+      val result = instance.get(key, ReadOption.eventualConsistency())
+
+      val post: Post = entity2model(result)
+      Some(post)
+    }
+
+    def entity2model(entity: Entity): Post = {
+      Post(
+        Some(entity.getKey.getName),
+        entity.getString("userId"),
+        entity.getString("text"),
+        Some(entity.getString("parentPostId")),
+        Some(entity.getLong("relatedPostCount").toInt),
+        Some(entity.getString("postedAt")),
+        true
+      ).get
     }
   }
 }
-
-
-

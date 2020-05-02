@@ -1,21 +1,19 @@
 package usecases.createpost
 
-import domains.post.Post
-import usecases.Repositories.{PostRepositoryComponent, UserRepositoryComponent}
+import domains.post.{Post, PostRepositoryComponent}
+import domains.user.UserRepositoryComponent
 
-trait ICreatePostInteractor extends PostRepositoryComponent with UserRepositoryComponent {
-  def run(inputData: CreatePostInputData, presenter: ICreatePostOutputBoundary): Option[Post] = {
+trait CreatePostInteractor extends PostRepositoryComponent with UserRepositoryComponent {
+  def run(inputData: CreatePostInputData, presenter: ICreatePostOutputBoundary): Unit = {
     val userId: String = inputData.userId
     val text: String = inputData.text
     val parentPostId: Option[String] = inputData.parentPostId
     val userIsExists: Boolean = userRepository.isExists(userId)
     val post: Option[Post] = Post(None, userId, text, parentPostId, None, None, userIsExists)
 
-    post match {
-      case Some(post) => val outputData: CreatePostOutputData = CreatePostOutputData(postRepository.store(post)); presenter.run(outputData)
-      case None => val outputData: CreatePostOutputData = CreatePostOutputData(throw new OutOfMemoryError()); presenter.run(outputData)
-    }
+    post.foreach(p => presenter.run(CreatePostOutputData(postRepository.store(p))))
   }
 }
+
 
 
