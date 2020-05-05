@@ -2,4 +2,6 @@ package usecases.getrelatedposts
 
 import domains.post.Post
 
-case class GetRelatedPostsOutputData(posts: Option[Seq[Post]])
+import scala.util.Try
+
+case class GetRelatedPostsOutputData(posts: Either[String, Seq[Post]])

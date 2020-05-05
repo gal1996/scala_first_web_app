@@ -18,17 +18,25 @@ class CreatePostController(var res: CreatePostResult) {
   val CreatePostPresenter: CreatePostPresenter = new CreatePostPresenter(CreatePostResult(Right(CreatePostSuccessResult(""))))
 
   def route: Route = {
-    pathPrefix("post/create") {
-      post {
+    post {
+      path(separateOnSlashes("post/create")) {
         entity(as[CreatePostParam]) { param =>
+          println("[start] CreatePost")
+
           run(param)
-          complete(res.value.toOption.get)
+
+          res.value.fold(
+            success => complete(success),
+            fail => complete(fail)
+          )
         }
       }
     }
   }
 
   def run(param: CreatePostParam): Unit = {
+    println("[start] CreatePostController")
+
     val user_id: String = param.userId
     val text: String = param.text
     val inputData: CreatePostInputData = CreatePostInputData(user_id, text, None)

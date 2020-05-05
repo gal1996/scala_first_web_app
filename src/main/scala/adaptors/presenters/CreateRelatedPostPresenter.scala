@@ -4,9 +4,15 @@ import usecases.createRelatedPost.{CreateRelatedPostOutputData, ICreateRelatedPo
 
 class CreateRelatedPostPresenter(var res: CreateRelatedPostResult) extends ICreateRelatedPostOutputBoundary {
   def run(outputData: CreateRelatedPostOutputData): Unit = {
-    outputData.post match {
-      case Some(_) => res.value = Right(CreateRelatedPostSuccessResult("OK"))
-      case _ => res.value = Left(CreateRelatedPostFailedResult("NG", "failed createPostFailedResult"))
-    }
+    println("[start] CreateRelatedPostPresenter")
+
+    outputData.post.fold(
+      message => res.value = Left(CreateRelatedPostFailedResult("NG", message)),
+      _ => res.value = Right(CreateRelatedPostSuccessResult("OK"))
+    )
+  }
+
+  def getValue(): CreateRelatedPostResult ={
+    res
   }
 }

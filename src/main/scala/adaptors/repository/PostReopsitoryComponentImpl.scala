@@ -1,18 +1,23 @@
 package adaptors.repository
 
+import java.io.FileInputStream
+
+import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.datastore.StructuredQuery.{OrderBy, PropertyFilter}
 import domains.post.{Post, PostRepositoryComponent}
 import com.google.cloud.datastore._
 
-import scala.concurrent.Future
+trait UsesPostRepository extends PostRepositoryComponent {
+  val postRepository = PostRepositoryImpl
 
-trait PostRepositoryComponentImpl extends PostRepositoryComponent {
-  val postRepository = PostRepositoryImple
-  private val instance: Datastore = DatastoreOptions.newBuilder().setProjectId("unipos-gal").build().getService
+  private val credentials: GoogleCredentials = GoogleCredentials.fromStream(new FileInputStream("/Users/yugo_tsuchiya/Downloads/My First Project-422a504aa625.json"))
+  private val instance: Datastore = DatastoreOptions.newBuilder().setCredentials(credentials).setProjectId("poised-cathode-235316").build.getService
   private val kind = instance.newKeyFactory().setKind("Post")
 
-  object PostRepositoryImple extends PostRepository {
-    override def store(post: Post): Option[Post] = {
+  object PostRepositoryImpl extends PostRepository {
+    override def store(post: Post): Either[String, Post] = {
+      println("[start] PostRepository.store")
+
       val key = kind.newKey(post.id)
       val entity = Entity.newBuilder(key)
         .set("userId", post.userId)
@@ -21,12 +26,12 @@ trait PostRepositoryComponentImpl extends PostRepositoryComponent {
         .set("relatedPostCount", post.relatedPostCount)
         .set("postedAt", post.postedAt)
         .build()
-      instance.put(entity)
-
-      Option(post)
+      val res = instance.put(entity)
+      if (res != null) Right(post) else Left("datastore fail")
     }
 
-    override def findByRelatedPostId(parentPostId: String): Option[Seq[Post]] = {
+    override def findByRelatedPostId(parentPostId: String): Either[String, Seq[Post]] = {
+      println("[start] PostRepository.findByRelatedPostId")
       val query =
         Query.newEntityQueryBuilder()
           .setKind("Post")
@@ -35,30 +40,33 @@ trait PostRepositoryComponentImpl extends PostRepositoryComponent {
 
       val posts = scala.collection.mutable.ListBuffer.empty[Post]
       val queryResults = instance.run(query, ReadOption.eventualConsistency())
-      while (queryResults.hasNext) {
-        posts.append(entity2model(queryResults.next))
+      if (!queryResults.hasNext) {
+        Left("datastore fail")
+      } else {
+        while (queryResults.hasNext) {
+          posts.append(entity2model(queryResults.next))
+        }
+        Right(posts.toSeq)
       }
 
-      Some(posts.toSeq)
     }
 
-    override def get(id: String): Option[Post] = {
+    override def get(id: String): Either[String, Post] = {
+      println("[start] PostRepository.get")
       val key = kind.newKey(id)
       val result = instance.get(key, ReadOption.eventualConsistency())
 
-      val post: Post = entity2model(result)
-      Some(post)
+      if (result != null) Right(entity2model(result)) else Left("datastor fail")
     }
 
     def entity2model(entity: Entity): Post = {
-      Post(
-        Some(entity.getKey.getName),
+      Post.apply2(
+        entity.getKey.getName,
         entity.getString("userId"),
         entity.getString("text"),
         Some(entity.getString("parentPostId")),
-        Some(entity.getLong("relatedPostCount").toInt),
-        Some(entity.getString("postedAt")),
-        true
+        entity.getLong("relatedPostCount").toInt,
+        entity.getString("postedAt"),
       ).get
     }
   }

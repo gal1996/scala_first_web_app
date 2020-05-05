@@ -1,7 +1,7 @@
 package webapi
 
 import adaptors.CreatePostController
-import adaptors.controllers.GetRelatedPostsController
+import adaptors.controllers.{CreateRelatedPostController, GetRelatedPostsController}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
@@ -19,7 +19,8 @@ object WebServer {
   def main(args: Array[String]) {
     val route: Route =
       CreatePostController.route~
-      GetRelatedPostsController.route
+      GetRelatedPostsController.route~
+      CreateRelatedPostController.route
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
     println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")

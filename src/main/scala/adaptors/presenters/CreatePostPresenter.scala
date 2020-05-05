@@ -5,10 +5,12 @@ import usecases.createpost.CreatePostOutputData
 
 class CreatePostPresenter(var res: CreatePostResult) extends ICreatePostOutputBoundary {
   def run(outPutData: CreatePostOutputData): Unit = {
-    outPutData.post match {
-      case Some(_) => res.value = Right(CreatePostSuccessResult("OK"))
-      case _ => res.value = Left(CreatePostFailedResult("NG", "failed createPost"))
-    }
+    println("[start] CreatePostPresenter")
+
+    outPutData.post.fold(
+      message => res.value = Left(CreatePostFailedResult("NG", message)),
+      _ => res.value = Right(CreatePostSuccessResult("OK"))
+    )
   }
 
   def getValue(): CreatePostResult= {

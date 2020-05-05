@@ -2,8 +2,6 @@ package domains.post
 
 import java.util.{Date, UUID}
 
-import domains.user.UserRepositoryComponent
-
 class Post private (
   val id: String,
   val userId: String,
@@ -15,28 +13,40 @@ class Post private (
 
 }
 
-
 object Post {
-  def apply(_id: Option[String], _userId: String, _text: String, _parentPostId: Option[String], _relatedPostCount: Option[Int], _postedAt: Option[String], userIsExists: Boolean): Option[Post] = {
+  // 新規作成で使用
+  def apply(_userId: String, _text: String, _parentPostId: Option[String] ,userIsExists: Boolean): Option[Post] = {
     def isTextExists(text: String): Boolean = if (text != "") true else false
 
-    val id: String = _id.getOrElse(UUID.randomUUID().toString)
+    val id: String = UUID.randomUUID().toString
     val userId: String = _userId
     val text: String = _text
-    val ParentPostId: String = _parentPostId.getOrElse("")
-    val RelatedPostCount: Int = _relatedPostCount.getOrElse(0)
-    val postedAt = _postedAt.getOrElse("%tY-%<tm-%<td %<tH:%<tM:%<tS" format new Date)
+    val parentPostId: String = _parentPostId.getOrElse("")
+    val relatedPostCount: Int = 0
+    val postedAt = "%tY-%<tm-%<td %<tH:%<tM:%<tS" format new Date
 
     if (isTextExists(text) && userIsExists) {
-      val post:Post = new Post(id, userId, text, ParentPostId, RelatedPostCount, postedAt)
+      val post:Post = new Post(id, userId, text, parentPostId, relatedPostCount, postedAt)
       Some(post)
     } else {
       None
     }
   }
 
+  // 既存のDBから引いてきた時に使用する
+  def apply2(_id: String, _userId: String, _text: String, _parentPostId: Option[String], _relatedPostCount: Int, _postedAt: String): Option[Post] = {
+    val id: String = _id
+    val userId: String = _userId
+    val text: String = _text
+    val parentPostId: String = _parentPostId.getOrElse("")
+    val relatedPostResult: Int = _relatedPostCount
+    val postedAt: String = _postedAt
+
+    Some(new Post(id, userId, text, parentPostId, relatedPostResult, postedAt))
+  }
+
   def addRelatedPostCount(post: Post): Post = {
-    Post(Some(post.id), post.userId, post.text, Some(post.parentPostId), Some(post.relatedPostCount + 1), Some(post.postedAt), true).get
+    Post.apply2(post.id, post.userId, post.text, Some(post.parentPostId), post.relatedPostCount + 1, post.postedAt).get
   }
 }
 

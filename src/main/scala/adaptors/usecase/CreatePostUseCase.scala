@@ -1,6 +1,6 @@
 package adaptors.usecase
 
-import adaptors.repository.{PostRepositoryComponentImpl, UserRepositoryComponentImpl}
+import adaptors.repository.{UsesPostRepository, UsesUserRepository}
 import usecases.createpost.CreatePostInteractor
 
-object CreatePostUseCase extends CreatePostInteractor with PostRepositoryComponentImpl with UserRepositoryComponentImpl
+object CreatePostUseCase extends CreatePostInteractor with UsesPostRepository with UsesUserRepository
